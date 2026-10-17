@@ -1,3 +1,5 @@
+package user.utils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.databind.JavaType;
