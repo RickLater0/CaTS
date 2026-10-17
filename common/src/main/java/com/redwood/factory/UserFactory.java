@@ -1,4 +1,4 @@
-package com.redwood;
+package com.redwood.factory;
 
 import com.redwood.dataobj.IntegerType;
 import com.redwood.dataobj.StringType;

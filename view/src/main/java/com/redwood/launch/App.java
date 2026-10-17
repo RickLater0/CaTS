@@ -1,4 +1,4 @@
-package com.redwood;
+package com.redwood.launch;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,9 +17,5 @@ public class App extends Application {
         Scene scene = new Scene(FXMLLoader.load(resource));
         Stage stage = new Stage();
         stage.setScene(scene);
-    }
-
-    void main(String[] args) {
-        App.launch(args);
     }
 }

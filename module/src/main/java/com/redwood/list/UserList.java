@@ -1,4 +1,4 @@
-package com.redwood;
+package com.redwood.list;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import tools.jackson.dataformat.xml.XmlMapper;

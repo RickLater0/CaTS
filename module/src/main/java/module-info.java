@@ -3,5 +3,5 @@ module com.redwood.module {
     requires tools.jackson.databind;
     requires tools.jackson.dataformat.xml;
 
-    exports com.redwood;
+    exports com.redwood.list;
 }

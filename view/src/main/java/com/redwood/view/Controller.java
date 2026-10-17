@@ -2,7 +2,7 @@ package com.redwood.view;
 
 import java.util.*;
 
-import com.redwood.UserFactory;
+import com.redwood.factory.UserFactory;
 import com.redwood.interfaces.UserType;
 
 import javafx.event.ActionEvent;
