@@ -1,6 +1,9 @@
-package dataobj;
+package com.redwood;
 
-import interfaces.UserType;
+import com.redwood.dataobj.IntegerType;
+import com.redwood.dataobj.StringType;
+import com.redwood.dataobj.VectorPolar;
+import com.redwood.interfaces.UserType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

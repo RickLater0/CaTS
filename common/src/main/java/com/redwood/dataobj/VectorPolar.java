@@ -1,6 +1,6 @@
-package dataobj;
+package com.redwood.dataobj;
 
-import interfaces.UserType;
+import com.redwood.interfaces.UserType;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
