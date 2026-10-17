@@ -1,6 +1,5 @@
-import dataobj.IntegerType;
-import dataobj.StringType;
-import dataobj.VectorPolar;
+package dataobj;
+
 import interfaces.UserType;
 
 import java.util.ArrayList;
