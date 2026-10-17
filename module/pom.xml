@@ -12,16 +12,10 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
-            <groupId>com.redwood</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.11.1</version>
+            <version>3.2.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <artifactId>module</artifactId>

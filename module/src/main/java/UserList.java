@@ -1,6 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.databind.JavaType;
 
 import java.io.IOException;
 import java.io.Reader;
