@@ -13,8 +13,27 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Пользовательская реализация структуры данных «Двусвязный разомкнутый список»,
+ * наследующаяся от {@link AbstractList}.
+ * <p>
+ * Особенности реализации:
+ * <ul>
+ *     <li>Элементы хранятся в узлах {@link Node}, содержащих ссылки на предыдущий и следующий элементы.</li>
+ *     <li>Список является «разомкнутым»: {@code head.prev == null} и {@code tail.next == null}.</li>
+ *     <li>Реализована сортировка слиянием (Merge Sort).</li>
+ *     <li>Поддерживается сериализация в XML с использованием библиотеки Jackson.</li>
+ * </ul>
+ *
+ * @param <E> тип хранимых элементов
+ */
 public class UserList<E> extends AbstractList<E>  {
 
+    /**
+     * Внутренний класс, представляющий узел двусвязного списка.
+     *
+     * @param <E> тип данных в узле
+     */
     private static class Node<E>{
         E data;
         Node<E> prev;
@@ -31,6 +50,11 @@ public class UserList<E> extends AbstractList<E>  {
     private Node<E> tail;
     private int size;
 
+    /**
+     * Создает список и заполняет его элементами из переданной коллекции.
+     *
+     * @param collection коллекция, элементы которой будут скопированы в список
+     */
     public UserList(Collection<? extends E> collection) {
         super();
         if (collection != null && !collection.isEmpty()) {
@@ -38,10 +62,18 @@ public class UserList<E> extends AbstractList<E>  {
         }
     }
 
+    /// Создание пустого списка
     public UserList() {
         super();
     }
 
+    /**
+     * Возвращает узел по его логическому номеру (индексу).
+     *
+     * @param index индекс элемента
+     * @return узел списка
+     * @throws IndexOutOfBoundsException если индекс выходит за пределы списка
+     */
     private Node<E> getNode(int index) {
         if(index < 0 || index >= size)
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -61,12 +93,26 @@ public class UserList<E> extends AbstractList<E>  {
         return cur;
     }
 
+    /**
+     * Добавляет элемент в конец списка.
+     *
+     * @param e добавляемый элемент
+     * @return {@code true} (согласно контракту {@link Collection#add})
+     */
     @Override
     public boolean add(E e){
         add(size, e);
         return true;
     }
 
+    /**
+     * Внутренний метод удаления узла из списка.
+     * <p>
+     * Разрывает связи узла с соседями и обнуляет данные.
+     *
+     * @param cur удаляемый узел
+     * @return данные, которые хранились в узле
+     */
     private E rm(Node<E> cur){
         E data = cur.data;
         if (cur.prev != null)
@@ -88,6 +134,12 @@ public class UserList<E> extends AbstractList<E>  {
         return data;
     }
 
+    /**
+     * Удаляет первое вхождение указанного объекта из списка.
+     *
+     * @param o объект для удаления
+     * @return {@code true}, если элемент был найден и удален
+     */
     @Override
     public boolean remove(Object o) {
         var cur = head;
@@ -101,6 +153,7 @@ public class UserList<E> extends AbstractList<E>  {
         return false;
     }
 
+    /// Очищает список, удаляя все элементы.
     @Override
     public void clear() {
         Node<E> cur = head;
@@ -116,11 +169,25 @@ public class UserList<E> extends AbstractList<E>  {
         modCount++;
     }
 
+    /**
+     * Возвращает элемент по указанному индексу.
+     *
+     * @param index индекс элемента
+     * @return элемент списка
+     * @throws IndexOutOfBoundsException если индекс выходит за границы
+     */
     @Override
     public E get(int index) {
         return getNode(index).data;
     }
 
+    /**
+     * Заменяет элемент по указанному индексу.
+     *
+     * @param index индекс заменяемого элемента
+     * @param element новый элемент
+     * @return предыдущий элемент, хранившийся по этому индексу
+     */
     @Override
     public E set(int index, E element) {
         var node = getNode(index);
@@ -129,6 +196,13 @@ public class UserList<E> extends AbstractList<E>  {
         return old;
     }
 
+    /**
+     * Вставляет элемент по указанному индексу.
+     *
+     * @param index индекс, по которому будет вставлен элемент
+     * @param element вставляемый элемент
+     * @throws IndexOutOfBoundsException если индекс выходит за границы
+     */
     @Override
     public void add(int index, E element) {
         Node<E> node = new Node<>(element);
@@ -157,11 +231,23 @@ public class UserList<E> extends AbstractList<E>  {
         modCount++;
     }
 
+    /**
+     * Удаляет элемент по указанному индексу.
+     *
+     * @param index индекс удаляемого элемента
+     * @return удаленный элемент
+     */
     @Override
     public E remove(int index){
         return rm(getNode(index));
     }
 
+    /**
+     * Возвращает индекс первого вхождения объекта.
+     *
+     * @param o искомый объект
+     * @return индекс элемента или {@code -1}, если элемент не найден
+     */
     @Override
     public int indexOf(Object o) {
         int index = 0;
@@ -176,6 +262,12 @@ public class UserList<E> extends AbstractList<E>  {
         return -1;
     }
 
+    /**
+     * Возвращает индекс последнего вхождения объекта.
+     *
+     * @param o искомый объект
+     * @return индекс элемента или {@code -1}, если элемент не найден
+     */
     @Override
     public int lastIndexOf(Object o) {
         int index = size - 1;
@@ -190,11 +282,25 @@ public class UserList<E> extends AbstractList<E>  {
         return -1;
     }
 
+    /**
+     * Возвращает итератор списка (начиная с нулевого индекса).
+     *
+     * @return итератор списка
+     */
     @Override
     public ListIterator<E> listIterator() {
         return listIterator(0);
     }
 
+    /**
+     * Возвращает двунаправленный итератор по списку.
+     * <p>
+     * Итератор поддерживает fail-fast поведение и выбрасывает {@link ConcurrentModificationException},
+     * если список был изменен структурно во время итерации.
+     *
+     * @param index индекс, с которого начнется итерация
+     * @return итератор списка
+     */
     @Override
     public ListIterator<E> listIterator(int index) {
         if (index < 0 || index > size)
@@ -237,7 +343,7 @@ public class UserList<E> extends AbstractList<E>  {
             public E previous() {
                 checkForComodification();
                 if (!hasPrevious())
-                    throw new NoSuchElementException("No such element");
+                    throw new NoSuchElementException("No previous element");
 
                 next = (next == null) ? tail : next.prev;
                 lastReturned = next;
@@ -284,28 +390,79 @@ public class UserList<E> extends AbstractList<E>  {
             @Override
             public void add(E e) {
                 checkForComodification();
-                UserList.this.add(nextIdx, e);
-                lastReturned = null;
+                Node<E> newNode = new Node<>(e);
+
+                if (next != null) {
+                    newNode.prev = next.prev;
+                    newNode.next = next;
+
+                    if (next.prev == null) {
+                        head = newNode;
+                    } else {
+                        next.prev.next = newNode;
+                    }
+                    next.prev = newNode;
+                } else {
+                    newNode.prev = tail;
+
+                    if (tail == null) {
+                        head = newNode;
+                    } else {
+                        tail.next = newNode;
+                    }
+                    tail = newNode;
+                }
+
                 nextIdx++;
+                size++;
+                modCount++;
+
+                lastReturned = null;
                 expectedModCount = modCount;
             }
         };
     }
 
+    /**
+     * Возвращает текущий размер списка.
+     *
+     * @return количество элементов в списке
+     */
     @Override
     public int size(){
         return size;
     }
 
+    //foreach есть через интерфейс Iterable
+
+    /**
+     * Выполняет заданное действие для каждого элемента списка.
+     * <p>
+     * Реализация кастомного итератора из задания (вместо стандартного {@code for-each}).
+     *
+     * @param action действие, выполняемое для каждого элемента
+     *
+     * @throws NullPointerException если action равен {@code null}
+     */
     @Override
-    public void forEach(Consumer<? super E> action){
+    public void forEach(Consumer<? super E> action) {
+        if(action == null)
+            throw new NullPointerException("Action can not be null");
         var cur = head;
-        while(cur != null){
+        while (cur != null) {
             action.accept(cur.data);
             cur = cur.next;
         }
     }
 
+    /**
+     * Находит первый элемент, удовлетворяющий заданному условию.
+     * <p>
+     * Реализация кастомного поиска из задания.
+     *
+     * @param predicate условие проверки элемента
+     * @return первый найденный элемент или {@code null}, если элементов, удовлетворяющих условию, нет
+     */
     public E firstThat(Predicate<E> predicate){
         var cur = head;
         while(cur != null){
@@ -319,6 +476,14 @@ public class UserList<E> extends AbstractList<E>  {
 
     private record Range<E>(Node<E> head, Node<E> tail){}
 
+    /**
+     * Сортирует список с использованием алгоритма сортировки слиянием (Merge Sort).
+     * <p>
+     * Сложность алгоритма: O(N log N). Сортировка устойчивая (stable).
+     *
+     * @param cmp компаратор для сравнения элементов
+     * @throws NullPointerException если компаратор равен {@code null}
+     */
     @Override
     public void sort(Comparator<? super E> cmp){
         if(size <= 1)
@@ -333,6 +498,13 @@ public class UserList<E> extends AbstractList<E>  {
         modCount++;
     }
 
+    /**
+     * Рекурсивно разделяет список на две половины и сортирует каждую.
+     *
+     * @param node начало сортируемой части
+     * @param cmp компаратор
+     * @return диапазон, содержащий начало и конец отсортированной части
+     */
     private Range<E> sortRec(Node<E> node, Comparator<? super E> cmp){
         if (node == null)
             return new Range<>(null, null);
@@ -359,6 +531,14 @@ public class UserList<E> extends AbstractList<E>  {
         return merge(left, right, cmp);
     }
 
+    /**
+     * Сливает два отсортированных списка в один.
+     *
+     * @param leftRange левый отсортированный диапазон
+     * @param rightRange правый отсортированный диапазон
+     * @param cmp компаратор
+     * @return объединенный отсортированный диапазон
+     */
     private Range<E> merge(Range<E> leftRange, Range<E> rightRange, Comparator<? super E> cmp){
         Node<E> dummy = new Node<>(null);
         Node<E> cur = dummy;
@@ -398,6 +578,11 @@ public class UserList<E> extends AbstractList<E>  {
         return listIterator();
     }
 
+    /**
+     * Возвращает массив, содержащий все элементы списка.
+     *
+     * @return массив объектов
+     */
     @Override
     public Object[] toArray() {
         Object[] arr = new Object[size];
@@ -408,6 +593,13 @@ public class UserList<E> extends AbstractList<E>  {
         return arr;
     }
 
+    /**
+     * Возвращает массив, содержащий все элементы списка; тип возвращаемого массива
+     * определяется типом переданного массива.
+     *
+     * @param a массив, в который будут помещены элементы (если достаточно места)
+     * @return массив, содержащий все элементы списка
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T[] toArray(T[] a) {
@@ -424,6 +616,16 @@ public class UserList<E> extends AbstractList<E>  {
         return a;
     }
 
+    /**
+     * Сохраняет список в формате XML в указанный поток вывода.
+     * <p>
+     * Использует Jackson {@code XmlMapper} с включенным форматированием (отступами).
+     *
+     * @param out поток для записи
+     * @param list сохраняемый список
+     * @param <T> тип хранимых элементов
+     * @throws IOException при ошибке записи в поток
+     */
     public static<T> void save(Writer out, UserList<T> list) throws IOException{
         XmlMapper mapper = XmlMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
@@ -431,7 +633,16 @@ public class UserList<E> extends AbstractList<E>  {
         mapper.writeValue(out, list);
     }
 
-    public static<T> UserList<T> load(Reader in, Class<T> eType) {
+    /**
+     * Загружает список из XML-потока.
+     *
+     * @param in поток для чтения
+     * @param eType класс хранимых элементов (нужен для десериализации generic-типа)
+     * @param <T> тип хранимых элементов
+     * @return загруженный список
+     * @throws RuntimeException если файл поврежден или не соответствует ожидаемому формату
+     */
+    public static<T> UserList<T> load(Reader in, Class<T> eType) throws RuntimeException{
         XmlMapper mapper = XmlMapper.builder().build();
         JavaType type = mapper.getTypeFactory().constructCollectionType(UserList.class, eType);
         return mapper.readValue(in, type);
