@@ -60,7 +60,7 @@
 * сохранение/загрузка СД в файл
 
 <p align="center">
-  <img src="images/CleanApp.png" alt="Только запущенное приложение" width="500">
+  <img src="images/CleanApp.png" alt="Только запущенное приложение" width="400">
 </p>
 
 <p align="center">
