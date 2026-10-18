@@ -45,7 +45,7 @@
 
 #### Module
 
-В модуле common ([com.redwood.common](module/src/main/java/com/redwood)) реализован класс [UserList](module/src/main/java/com/redwood/list/UserList.java) - это пользовательская коллекция, наследуемая от абстрактного класса AbstractList и по факту являющаяся двусвязным списком. В пользовательской коллекции реализованы базовые методы (удаление, вставка, получение по индексу), класс ListIterator - итератор для списка; [сортировка слиянием](https://en.wikipedia.org/wiki/Merge_sort), в так же сериализация в xml формат
+В модуле common ([com.redwood.common](module/src/main/java/com/redwood)) реализован класс [UserList](module/src/main/java/com/redwood/list/UserList.java) - это пользовательская коллекция, наследуемая от абстрактного класса AbstractList и по факту являющаяся двусвязным списком. В пользовательской коллекции реализованы базовые методы (удаление, вставка, замена значения по индексу, получение по индексу), класс ListIterator - итератор для списка; [сортировка слиянием](https://en.wikipedia.org/wiki/Merge_sort), в так же сериализация в xml формат
 
 #### View
 

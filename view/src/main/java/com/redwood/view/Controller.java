@@ -13,6 +13,7 @@ import com.redwood.list.UserList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 
 public class Controller {
     @FXML
@@ -110,13 +111,12 @@ public class Controller {
     @FXML
     void remove(ActionEvent event) {
         try {
-            int index = Integer.parseInt(getIndexField.getText().trim());
-            UserType obj = activeList.get(index);
-            if(obj != null){
-                getResultLabel.setText("Res: " + obj);
-            }
+            UserType obj = (UserType) activeType.parseValue(removeIndexField.getText().trim());
+            activeList.remove(obj);
+            updateListView();
+            getIndexField.clear();
         } catch (Exception e) {
-            getResultLabel.setText("Remove err: " + e.getMessage());
+            showError("Remove err: " + e.getMessage());
         }
     }
 
@@ -218,6 +218,11 @@ public class Controller {
         for (UserType item : activeList) {
             listView.getItems().add(item.toString());
         }
+
+        if (listView.getScene() != null && listView.getScene().getWindow() instanceof Stage stage) {
+            stage.setTitle("LR1 — " + activeType.typeName() + " [Size: " + activeList.size() + "]");
+        }
+        clearFields();
     }
 
     private void showError(String message) {
@@ -226,5 +231,12 @@ public class Controller {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void clearFields(){
+        addIndexField.clear();
+        getIndexField.clear();
+        removeIndexField.clear();
+        valField.clear();
     }
 }
