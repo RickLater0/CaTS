@@ -8,26 +8,20 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class StringType implements Comparable<StringType>, UserType, Serializable {
+public record StringType(String value) implements Comparable<StringType>, UserType, Serializable {
 
     private static final String TYPE_NAME = "String";
-    private final String value;
 
     /// Создание обёртки с конкретным значением
-    public StringType(String value) {
+    public StringType {
         if (value == null) {
             throw new IllegalArgumentException("Value can not be null");
         }
-        this.value = value;
     }
 
     /// Создание обёртки-прототипа (пустая строка)
     public StringType() {
-        this.value = "";
-    }
-
-    public String getValue() {
-        return value;
+        this("");
     }
 
     public static StringType copyOf(StringType other) {
@@ -71,8 +65,8 @@ public class StringType implements Comparable<StringType>, UserType, Serializabl
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Comparator getTypeComparator() {
-        return Comparator.comparing(StringType::getValue);
+    public Comparator typeComparator() {
+        return Comparator.comparing(StringType::value);
     }
 
     @Override

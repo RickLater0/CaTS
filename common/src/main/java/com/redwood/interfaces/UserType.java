@@ -10,5 +10,5 @@ public interface UserType{
     Object parseValue(String input);            // Создает и парсит содержимое из строки
 
     @SuppressWarnings("rawtypes")
-    Comparator getTypeComparator();             // Возвращает компаратор для сравнения
+    Comparator typeComparator();             // Возвращает компаратор для сравнения
 }

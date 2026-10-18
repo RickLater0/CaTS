@@ -1,3 +1,5 @@
+userList*.xml
+userSaves/
 # Created by https://www.toptal.com/developers/gitignore/api/java,kotlin,scala,intellij+all,maven
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,kotlin,scala,intellij+all,maven
 

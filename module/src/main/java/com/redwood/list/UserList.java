@@ -1,6 +1,7 @@
 package com.redwood.list;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.databind.JavaType;
 
@@ -43,7 +44,7 @@ public class UserList<E> extends AbstractList<E>  {
 
     private Node<E> getNode(int index) {
         if(index < 0 || index >= size)
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         Node<E> cur;
         if(index <= size / 2){
             cur = head;
@@ -207,7 +208,7 @@ public class UserList<E> extends AbstractList<E>  {
 
             private void checkForComodification() {
                 if (modCount != expectedModCount)
-                    throw new ConcurrentModificationException();
+                    throw new ConcurrentModificationException("Concurrent modification");
             }
 
             @Override
@@ -219,7 +220,7 @@ public class UserList<E> extends AbstractList<E>  {
             public E next() {
                 checkForComodification();
                 if (!hasNext())
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException("No such element");
 
                 lastReturned = next;
                 next = next.next;
@@ -236,7 +237,7 @@ public class UserList<E> extends AbstractList<E>  {
             public E previous() {
                 checkForComodification();
                 if (!hasPrevious())
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException("No such element");
 
                 next = (next == null) ? tail : next.prev;
                 lastReturned = next;
@@ -258,7 +259,7 @@ public class UserList<E> extends AbstractList<E>  {
             public void remove() {
                 checkForComodification();
                 if (lastReturned == null)
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Illegal state");
 
                 Node<E> lastNext = lastReturned.next;
                 UserList.this.rm(lastReturned);
@@ -276,7 +277,7 @@ public class UserList<E> extends AbstractList<E>  {
             public void set(E e) {
                 checkForComodification();
                 if (lastReturned == null)
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Illegal state");
                 lastReturned.data = e;
             }
 
@@ -424,12 +425,14 @@ public class UserList<E> extends AbstractList<E>  {
     }
 
     public static<T> void save(Writer out, UserList<T> list) throws IOException{
-        XmlMapper mapper = new XmlMapper();
+        XmlMapper mapper = XmlMapper.builder()
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .build();
         mapper.writeValue(out, list);
     }
 
-    public static<T> UserList<T> load(Reader in, Class<T> eType) throws IOException {
-        XmlMapper mapper = new XmlMapper();
+    public static<T> UserList<T> load(Reader in, Class<T> eType) {
+        XmlMapper mapper = XmlMapper.builder().build();
         JavaType type = mapper.getTypeFactory().constructCollectionType(UserList.class, eType);
         return mapper.readValue(in, type);
     }

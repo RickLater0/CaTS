@@ -11,7 +11,7 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="509.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.redwood.view.Controller">
    <children>
       <Button fx:id="addButton" layoutX="14.0" layoutY="85.0" mnemonicParsing="false" onAction="#add" prefHeight="25.0" prefWidth="42.0" text="add" />
-      <ComboBox fx:id="typesComboBox" layoutX="14.0" layoutY="239.0" prefHeight="25.0" prefWidth="165.0" />
+      <ComboBox fx:id="typesComboBox" layoutX="14.0" layoutY="239.0" onAction="#typeChoose" prefHeight="25.0" prefWidth="165.0" />
       <Button fx:id="removeButton" layoutX="14.0" layoutY="52.0" mnemonicParsing="false" onAction="#remove" prefHeight="25.0" prefWidth="42.0" text="rm" />
       <Button fx:id="removeByIndButton" layoutX="67.0" layoutY="52.0" mnemonicParsing="false" onAction="#removeByInd" prefHeight="25.0" prefWidth="56.0" text="rm -i" />
       <TextField fx:id="valField" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="165.0" promptText="value" />
@@ -24,7 +24,7 @@
       <Button fx:id="sortButton" layoutX="14.0" layoutY="122.0" mnemonicParsing="false" onAction="#sort" prefHeight="25.0" prefWidth="42.0" text="sort" />
       <TextField fx:id="addIndexField" layoutX="123.0" layoutY="85.0" prefHeight="25.0" prefWidth="56.0" promptText="ind" />
       <Button fx:id="addByIndButton" layoutX="67.0" layoutY="85.0" mnemonicParsing="false" onAction="#addByInd" prefHeight="25.0" prefWidth="56.0" text="add -i" />
-      <Button layoutX="67.0" layoutY="122.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="56.0" text="get -i" />
+      <Button fx:id="getButton" layoutX="67.0" layoutY="122.0" mnemonicParsing="false" onAction="#get" prefHeight="25.0" prefWidth="56.0" text="get -i" />
       <Label fx:id="getResultLabel" layoutX="70.0" layoutY="157.0" text="get result" />
       <TextField fx:id="getIndexField" layoutX="123.0" layoutY="122.0" prefHeight="25.0" prefWidth="56.0" promptText="ind" />
       <Button fx:id="clearButton" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" onAction="#clear" prefHeight="25.0" prefWidth="42.0" text="clear" />

@@ -8,23 +8,13 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class IntegerType implements Comparable<IntegerType>, UserType, Serializable {
+public record IntegerType(int value) implements Comparable<IntegerType>, UserType, Serializable {
 
     private static final String TYPE_NAME = "Integer";
-    private final int value;
-
-    /// Создание обёртки с конкретным значением
-    public IntegerType(int value) {
-        this.value = value;
-    }
 
     /// Создание обёртки-прототипа (ноль)
     public IntegerType() {
-        this.value = 0;
-    }
-
-    public int getValue() {
-        return value;
+        this(0);
     }
 
     public static IntegerType copyOf(IntegerType other) {
@@ -71,8 +61,8 @@ public class IntegerType implements Comparable<IntegerType>, UserType, Serializa
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Comparator getTypeComparator() {
-        return Comparator.comparingInt(IntegerType::getValue);
+    public Comparator typeComparator() {
+        return Comparator.comparingInt(IntegerType::value);
     }
 
     @Override

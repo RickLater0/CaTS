@@ -17,6 +17,7 @@ public class App extends Application {
         Scene scene = new Scene(FXMLLoader.load(resource));
         Stage stage = new Stage();
         stage.setScene(scene);
+        stage.setTitle("LR1 - double linked list");
         stage.show();
     }
 }
