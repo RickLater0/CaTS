@@ -140,7 +140,7 @@
               </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.redwood.launch.App</mainClass>
+                  <mainClass>com.redwood.launch.Launcher</mainClass>
                 </transformer>
               </transformers>
             </configuration>
