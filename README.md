@@ -43,9 +43,9 @@
 
 В этом модуле написана фабрика [UserFactory](common/src/main/java/com/redwood/factory/UserFactory.java). Фабрика возвращает вектор имен типов, на основе которых строится выпадающий список для выбора текущего ТД во вьюшке. По имени выбранного ТД фабрика возвращает объект-прототип.
 
-#### Module
+#### Impl
 
-В модуле module ([com.redwood.module](module/src/main/java/com/redwood)) реализован класс [UserList](module/src/main/java/com/redwood/list/UserList.java) - это пользовательская коллекция, наследуемая от абстрактного класса AbstractList и по факту являющаяся двусвязным списком. В пользовательской коллекции реализованы базовые методы (удаление, вставка, замена значения по индексу, получение по индексу), класс ListIterator - итератор для списка; [сортировка слиянием](https://en.wikipedia.org/wiki/Merge_sort), в так же сериализация в xml формат
+В модуле module ([com.redwood.module](impl/src/main/java/com/redwood)) реализован класс [UserList](impl/src/main/java/com/redwood/collections/UserJavaList.java) - это пользовательская коллекция, наследуемая от абстрактного класса AbstractList и по факту являющаяся двусвязным списком. В пользовательской коллекции реализованы базовые методы (удаление, вставка, замена значения по индексу, получение по индексу), класс ListIterator - итератор для списка; [сортировка слиянием](https://en.wikipedia.org/wiki/Merge_sort), в так же сериализация в xml формат
 
 #### View
 

@@ -4,7 +4,7 @@ module com.redwood.view {
     requires javafx.fxml;
     requires javafx.graphics;
 
-    requires com.redwood.module;
+	//requires com.redwood.impl;
     requires com.redwood.common;
 
     opens com.redwood.launch to javafx.graphics, javafx.fxml;
