@@ -1,9 +1,0 @@
-module com.redwood.impl {
-	requires com.fasterxml.jackson.annotation;
-	requires tools.jackson.databind;
-	requires tools.jackson.dataformat.xml;
-	requires kotlin.stdlib;
-	requires annotations;
-
-	exports com.redwood.collections;
-}
