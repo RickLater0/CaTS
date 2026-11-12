@@ -7,10 +7,9 @@ import tools.jackson.dataformat.xml.XmlMapper
 import java.io.{Reader, Writer}
 import java.util
 import java.util.{Comparator, ConcurrentModificationException, NoSuchElementException}
+import scala.math.Ordering
 
-/**
- * Двусвязный разомкнутый список на Scala.
- */
+/** Двусвязный разомкнутый список с сортировками (функциональная и императивная) и XML-сериализацией. */
 class UserScalaList[T] extends IUserList[T] {
 
 	private final class Node(var data: T) {
@@ -109,6 +108,27 @@ class UserScalaList[T] extends IUserList[T] {
 		head = None; tail = None; _size = 0; modCount += 1
 	}
 
+	/** Вызывает `f` для каждого элемента списка. */
+	def foreach(f: T => Unit): Unit = {
+		if (f == null) throw new NullPointerException("f cannot be null")
+		var cur = head
+		while (cur.isDefined) {
+			f(cur.get.data)
+			cur = cur.get.next
+		}
+	}
+
+	/** Первый элемент, удовлетворяющий предикату, либо `None`. */
+	def firstThat(p: T => Boolean): Option[T] = {
+		if (p == null) throw new NullPointerException("p cannot be null")
+		var cur = head
+		while (cur.isDefined) {
+			if (p(cur.get.data)) return Some(cur.get.data)
+			cur = cur.get.next
+		}
+		None
+	}
+
 	override def iterator(): java.util.Iterator[T] = listIterator()
 
 	override def listIterator(): util.ListIterator[T] = {
@@ -189,15 +209,27 @@ class UserScalaList[T] extends IUserList[T] {
 		}
 	}
 
-	override def sort(cmp: Comparator[? >: T]): Unit = {
-		if (cmp == null) throw new NullPointerException("Comparator cannot be null")
-		if (_size > 1) {
-			val (h, t) = mergeSortRec(head, cmp)
-			head = h; tail = t; modCount += 1
-		}
+	/** Мост для Java-интерфейса; внутри — императивная сортировка. */
+	override def sort(c: Comparator[? >: T]): Unit = {
+		if (c == null) throw new NullPointerException("Comparator cannot be null")
+		sortImperative((a: T, b: T) => c.compare(a, b))
 	}
 
-	private def mergeSortRec(node: Option[Node], cmp: Comparator[? >: T]): (Option[Node], Option[Node]) = {
+	/** Императивная сортировка по `given Ordering[T]`. */
+	def sort(using ord: Ordering[T]): Unit = sortImperative(ord.compare)
+
+	/** Функциональная сортировка по `given Ordering[T]`. */
+	def sortFunctional(using ord: Ordering[T]): Unit = sortFunctional(ord.compare)
+
+	/** Функциональная сортировка по внешней функции сравнения. */
+	def sortFunctional(cmp: (T, T) => Int): Unit = {
+		if (cmp == null) throw new NullPointerException("Comparator cannot be null")
+		if (_size <= 1) return
+		val (h, t) = mergeSortRec(head, cmp)
+		head = h; tail = t; modCount += 1
+	}
+
+	private def mergeSortRec(node: Option[Node], cmp: (T, T) => Int): (Option[Node], Option[Node]) = {
 		node match {
 			case None => (None, None)
 			case Some(n) if n.next.isEmpty => (Some(n), Some(n))
@@ -211,35 +243,97 @@ class UserScalaList[T] extends IUserList[T] {
 
 				val (lh, _) = mergeSortRec(Some(n), cmp)
 				val (rh, _) = mergeSortRec(half, cmp)
-				mergeRanges(lh, rh, cmp)
+				mergeTwo(lh, rh, cmp)
 		}
 	}
 
-	private def mergeRanges(left: Option[Node], right: Option[Node], cmp: Comparator[? >: T]): (Option[Node], Option[Node]) = {
+	/** Императивная сортировка по внешней функции сравнения. */
+	def sortImperative(using ord: Ordering[T]): Unit = sortImperative(ord.compare)
+
+	/** Bottom-up merge sort; O(N log N) по времени, O(1) по памяти. */
+	def sortImperative(cmp: (T, T) => Int): Unit = {
+		if (cmp == null) throw new NullPointerException("Comparator cannot be null")
+		if (_size <= 1) return
+		bottomUpMergeSort(cmp)
+		modCount += 1
+	}
+
+	private def bottomUpMergeSort(cmp: (T, T) => Int): Unit = {
+		var step = 1
+		while (step < _size) {
+			var cur = head
+			var newHead: Option[Node] = None
+			var newTail: Option[Node] = None
+
+			while (cur.isDefined) {
+				val (left,  rest1) = splitRun(cur, step)
+				val (right, rest2) = splitRun(rest1, step)
+				val (mh, mt)       = mergeTwo(left, right, cmp)
+
+				if (newHead.isEmpty) { newHead = mh; newTail = mt }
+				else {
+					newTail.foreach(_.next = mh)
+					mh.foreach(_.prev = newTail)
+					newTail = mt
+				}
+				cur = rest2
+			}
+
+			head = newHead
+			tail = newTail
+			step *= 2
+		}
+	}
+
+	/** Отрезает первые `n` узлов; возвращает (голова отрезка, остаток). */
+	private def splitRun(start: Option[Node], n: Int): (Option[Node], Option[Node]) = {
+		start match {
+			case None => (None, None)
+			case Some(h) =>
+				var cur = h
+				var i = 1
+				while (i < n && cur.next.isDefined) { cur = cur.next.get; i += 1 }
+				val rest = cur.next
+				cur.next = None
+				rest.foreach(_.prev = None)
+				(start, rest)
+		}
+	}
+
+	/** Сливает два отсортированных подсписка; возвращает (голова, хвост). */
+	private def mergeTwo(
+							a: Option[Node], b: Option[Node], cmp: (T, T) => Int
+						): (Option[Node], Option[Node]) = {
 		val dummy = new Node(null.asInstanceOf[T])
-		var cur = dummy; var l = left; var r = right
+		var cur = dummy
+		var l = a
+		var r = b
 
 		while (l.isDefined && r.isDefined) {
-			if (cmp.compare(l.get.data, r.get.data) <= 0) {
+			if (cmp(l.get.data, r.get.data) <= 0) {
 				cur.next = l; l.get.prev = Some(cur); l = l.get.next
 			} else {
 				cur.next = r; r.get.prev = Some(cur); r = r.get.next
 			}
 			cur = cur.next.get
 		}
+
 		val rest = if (l.isDefined) l else r
 		if (rest.isDefined) {
-			cur.next = rest; rest.get.prev = Some(cur)
-			while (cur.next.isDefined) cur = cur.next.get
+			cur.next = rest
+			rest.get.prev = Some(cur)
 		}
-		val newHead = dummy.next
-		newHead.foreach(_.prev = None)
-		(newHead, Some(cur))
+
+		var last = cur
+		while (last.next.isDefined) last = last.next.get
+
+		val h = dummy.next
+		h.foreach(_.prev = None)
+		(h, Some(last))
 	}
 
 	override def save(out: Writer): Unit = {
 		val mapper = XmlMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build()
-		// XmlMapper сам обойдет список через Iterator
 		mapper.writeValue(out, this)
 	}
 

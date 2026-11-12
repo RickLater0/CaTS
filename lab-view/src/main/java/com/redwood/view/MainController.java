@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
@@ -54,17 +55,36 @@ public class MainController {
 		indexField.setPromptText("Index");
 		valField.setPromptText("Value");
 
-		Button addBtn = new Button("Add (End)"); addBtn.setMaxWidth(Double.MAX_VALUE); addBtn.setOnAction(e -> add());
-		Button addByIndBtn = new Button("Add by Index"); addByIndBtn.setMaxWidth(Double.MAX_VALUE); addByIndBtn.setOnAction(e -> addByInd());
-		Button removeBtn = new Button("Remove by Index"); removeBtn.setMaxWidth(Double.MAX_VALUE); removeBtn.setOnAction(e -> removeByInd());
+		Button addBtn = new Button("Add (End)");
+		addBtn.setMaxWidth(Double.MAX_VALUE);
+		addBtn.setOnAction(e -> add());
+		Button addByIndBtn = new Button("Add by Index");
+		addByIndBtn.setMaxWidth(Double.MAX_VALUE);
+		addByIndBtn.setOnAction(e -> addByInd());
+		Button removeBtn = new Button("Remove by Index");
+		removeBtn.setMaxWidth(Double.MAX_VALUE);
+		removeBtn.setOnAction(e -> removeByInd());
 
 		// НОВАЯ КНОПКА GET
-		Button getBtn = new Button("Get by Index"); getBtn.setMaxWidth(Double.MAX_VALUE); getBtn.setOnAction(e -> getByIndex());
+		Button getBtn = new Button("Get by Index");
+		getBtn.setMaxWidth(Double.MAX_VALUE);
+		getBtn.setOnAction(e -> getByIndex());
 
-		Button sortBtn = new Button("Sort"); sortBtn.setMaxWidth(Double.MAX_VALUE); sortBtn.setOnAction(e -> sort());
-		Button clearBtn = new Button("Clear"); clearBtn.setMaxWidth(Double.MAX_VALUE); clearBtn.setOnAction(e -> { activeList.clear(); refreshList(); });
-		Button saveBtn = new Button("Save"); saveBtn.setMaxWidth(Double.MAX_VALUE); saveBtn.setOnAction(e -> save());
-		Button loadBtn = new Button("Load"); loadBtn.setMaxWidth(Double.MAX_VALUE); loadBtn.setOnAction(e -> load());
+		Button sortBtn = new Button("Sort");
+		sortBtn.setMaxWidth(Double.MAX_VALUE);
+		sortBtn.setOnAction(e -> sort());
+		Button clearBtn = new Button("Clear");
+		clearBtn.setMaxWidth(Double.MAX_VALUE);
+		clearBtn.setOnAction(e -> {
+			activeList.clear();
+			refreshList();
+		});
+		Button saveBtn = new Button("Save");
+		saveBtn.setMaxWidth(Double.MAX_VALUE);
+		saveBtn.setOnAction(e -> save());
+		Button loadBtn = new Button("Load");
+		loadBtn.setMaxWidth(Double.MAX_VALUE);
+		loadBtn.setOnAction(e -> load());
 
 		controls.getChildren().addAll(
 			new Label("Data Type:"), typesComboBox, new Separator(),
@@ -210,8 +230,6 @@ public class MainController {
 		}
 	}
 
-	// --- ОПЕРАЦИИ СО СПИСКОМ ---
-
 	private void add() {
 		try {
 			String text = valField.getText();
@@ -231,7 +249,8 @@ public class MainController {
 			UserType obj = (UserType) activeType.parseValue(valField.getText());
 			activeList.add(index, obj);
 			refreshList();
-			valField.clear(); indexField.clear();
+			valField.clear();
+			indexField.clear();
 		} catch (Exception e) {
 			showError("Insert error: " + e.getMessage());
 		}
@@ -313,19 +332,32 @@ public class MainController {
 	// --- ФАЙЛОВЫЕ ОПЕРАЦИИ ---
 
 	private void save() {
-		try (FileWriter wr = new FileWriter("userList_" + activeType.typeName() + ".xml")) {
-			activeList.save(wr);
+		try {
+			File dir = new File("userSaves");
+			if (!dir.exists() && !dir.mkdirs()) {
+				return;
+			}
+
+			File file = new File(dir, "userList_" + activeType.typeName() + ".xml");
+
+			try (FileWriter wr = new FileWriter(file)) {
+				activeList.save(wr);
+			}
 		} catch (Exception e) {
 			showError("Save error: " + e.getMessage());
 		}
 	}
 
 	private void load() {
-		try (FileReader rd = new FileReader("userList_" + activeType.typeName() + ".xml")) {
-			@SuppressWarnings("unchecked")
-			Class<UserType> clazz = (Class<UserType>) activeType.getClass();
-			activeList.load(rd, clazz);
-			refreshList();
+		try {
+			File file = new File("userSaves", "userList_" + activeType.typeName() + ".xml");
+
+			try (FileReader rd = new FileReader(file)) {
+				@SuppressWarnings("unchecked")
+				Class<UserType> clazz = (Class<UserType>) activeType.getClass();
+				activeList.load(rd, clazz);
+				refreshList();
+			}
 		} catch (Exception e) {
 			showError("Load error: " + e.getMessage());
 		}
