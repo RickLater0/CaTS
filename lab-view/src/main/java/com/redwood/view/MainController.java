@@ -18,7 +18,6 @@ import java.util.ListIterator;
 import java.util.Map;
 
 public class MainController {
-	// Храним отдельный список для каждого типа данных
 	private final Map<String, IUserList<UserType>> listsMap = new HashMap<>();
 	private final UserListProvider.ImplType implType;
 	private final UserFactory userFactory = new UserFactory();
@@ -44,7 +43,6 @@ public class MainController {
 		BorderPane root = new BorderPane();
 		root.setPadding(new Insets(10));
 
-		// --- ЛЕВАЯ ПАНЕЛЬ (УПРАВЛЕНИЕ) ---
 		VBox controls = new VBox(10);
 		controls.setPrefWidth(220);
 
@@ -65,7 +63,6 @@ public class MainController {
 		removeBtn.setMaxWidth(Double.MAX_VALUE);
 		removeBtn.setOnAction(e -> removeByInd());
 
-		// НОВАЯ КНОПКА GET
 		Button getBtn = new Button("Get by Index");
 		getBtn.setMaxWidth(Double.MAX_VALUE);
 		getBtn.setOnAction(e -> getByIndex());
@@ -93,19 +90,16 @@ public class MainController {
 			new Separator(), saveBtn, loadBtn, getResultLabel
 		);
 
-		// --- ЦЕНТР (ВИЗУАЛИЗАЦИЯ СПИСКА) ---
 		ScrollPane scrollPane = new ScrollPane(nodesBox);
 		scrollPane.setFitToHeight(true);
 		scrollPane.setStyle("-fx-background-color: transparent;");
 		nodesBox.setAlignment(Pos.CENTER_LEFT);
 		nodesBox.setPadding(new Insets(20));
 
-		// --- НИЗ (ИТЕРАТОР) ---
 		VBox bottomPanel = new VBox(10);
 		bottomPanel.setAlignment(Pos.CENTER);
 		bottomPanel.setPadding(new Insets(10));
 
-		// Навигация
 		HBox navPanel = new HBox(10);
 		navPanel.setAlignment(Pos.CENTER);
 		Button btnFirst = new Button("|<");
@@ -123,8 +117,6 @@ public class MainController {
 		btnPrev.setOnAction(e -> {
 			if (iterator.hasPrevious()) {
 				iterator.previous();
-				// previous() возвращает элемент, на котором мы стояли, и сдвигает курсор назад.
-				// Поэтому индекс текущего выделенного элемента = nextIndex().
 				currentIndex = iterator.nextIndex();
 				updateNodes();
 				updateIterLabel();
@@ -134,8 +126,6 @@ public class MainController {
 		btnNext.setOnAction(e -> {
 			if (iterator.hasNext()) {
 				iterator.next();
-				// next() возвращает элемент и сдвигает курсор вперед.
-				// Индекс только что полученного элемента = previousIndex().
 				currentIndex = iterator.previousIndex();
 				updateNodes();
 				updateIterLabel();
@@ -152,7 +142,6 @@ public class MainController {
 		});
 		navPanel.getChildren().addAll(btnFirst, btnPrev, iterLabel, btnNext, btnLast);
 
-		// НОВЫЕ КНОПКИ МОДИФИКАЦИИ ИТЕРАТОРА
 		HBox iterOpsPanel = new HBox(10);
 		iterOpsPanel.setAlignment(Pos.CENTER);
 		Button iterSetBtn = new Button("Set via Iter");
@@ -170,14 +159,12 @@ public class MainController {
 		root.setCenter(scrollPane);
 		root.setBottom(bottomPanel);
 
-		switchDataType(); // Инициализация первого типа
+		switchDataType();
 		return root;
 	}
 
-	// Переключение между списками разных типов
 	private void switchDataType() {
 		activeType = userFactory.getBuilderByName(typesComboBox.getValue());
-		// Если списка для этого типа еще нет - создаем его
 		activeList = listsMap.computeIfAbsent(activeType.typeName(), k -> UserListProvider.createList(implType));
 		refreshList();
 	}
@@ -287,8 +274,6 @@ public class MainController {
 		}
 	}
 
-	// --- ОПЕРАЦИИ ЧЕРЕЗ ИТЕРАТОР ---
-
 	private void iterSet() {
 		try {
 			if (currentIndex == -1) throw new IllegalStateException("Сначала переместите итератор!");
@@ -305,8 +290,6 @@ public class MainController {
 		try {
 			if (currentIndex == -1) throw new IllegalStateException("Сначала переместите итератор!");
 			iterator.remove();
-			// После удаления курсор стоит там же, где и был (перед следующим элементом).
-			// Выделять теперь нужно элемент, который встал на место удаленного.
 			currentIndex = iterator.previousIndex();
 			updateNodes();
 			updateIterLabel();
@@ -328,8 +311,6 @@ public class MainController {
 			showError("Iterator Add error: " + e.getMessage());
 		}
 	}
-
-	// --- ФАЙЛОВЫЕ ОПЕРАЦИИ ---
 
 	private void save() {
 		try {
