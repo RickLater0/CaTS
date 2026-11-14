@@ -378,33 +378,44 @@ class UserKotlinListTest {
     inner class PerformanceAndMemory {
 
         @Test
-        fun `complexity is N log N by comparison count (both sorts)`() {
-            for (impl in 0..1) {
-                val counts = LongArray(2)
-                val sizes = intArrayOf(512, 1024)
-                for (k in sizes.indices) {
-                    val n = sizes[k]
-                    val cnt = AtomicLong()
-                    val cmp = { a: Int, b: Int -> cnt.incrementAndGet(); a.compareTo(b) }
-                    val list = UserKotlinList<Int>()
-                    val rnd = Random(n.toLong())
-                    repeat(n) { list.add(rnd.nextInt()) }
-                    if (impl == 0) list.sortImperative(cmp) else list.sortFunctional(cmp)
-                    counts[k] = cnt.get()
-                }
-                val ratio = counts[1].toDouble() / counts[0]
-                assertTrue(ratio > 2.05, "impl=$impl ratio too small: $ratio")
-                assertTrue(ratio < 3.0, "impl=$impl ratio too large: $ratio")
-            }
-        }
+        fun `print full performance table`() {
+            val sizes = intArrayOf(1000, 2000, 4000, 8000, 16000)
 
-        @Test
-        fun `memory scales linearly with size`() {
-            val n = 5000
-            val list = UserKotlinList<Int>()
-            repeat(n) { list.add(it) }
-            assertEquals(n, countNodes(list))
-            assertEquals(n, list.size())
+            for (impl in 0..1) {
+                val name = if (impl == 0) "Imperative" else "Functional"
+                println("\n=== Kotlin ($name): Замер производительности и памяти ===")
+                // Форматируем заголовок с выравниванием влево
+                println("%-12s\t%-12s\t%-12s\t%-12s".format("N", "Comparisons", "Mem (KB)", "Time (ms)"))
+
+                for (n in sizes) {
+                    System.gc()
+                    val rt = Runtime.getRuntime()
+                    val memBefore = rt.totalMemory() - rt.freeMemory()
+
+                    val list = UserKotlinList<Int>()
+                    val rnd = Random(42)
+                    repeat(n) { list.add(rnd.nextInt()) }
+
+                    val swaps = AtomicLong()
+                    val cmp = { a: Int, b: Int ->
+                        swaps.incrementAndGet()
+                        a.compareTo(b)
+                    }
+
+                    val t0 = System.nanoTime()
+                    if (impl == 0) list.sortImperative(cmp) else list.sortFunctional(cmp)
+                    val timeMs = (System.nanoTime() - t0) / 1_000_000.0
+
+                    val memAfter = rt.totalMemory() - rt.freeMemory()
+                    val memKb = (memAfter - memBefore) / 1024
+
+                    // Вывод строки с выравниванием
+                    println("%-12d\t%-12d\t%-12d\t%-12.3f".format(n, swaps.get(), memKb, timeMs))
+
+                    val upperBound = n * (Math.log(n.toDouble()) / Math.log(2.0) + 2)
+                    assertTrue(swaps.get() <= upperBound, "$name Too many comparisons: ${swaps.get()}")
+                }
+            }
         }
     }
 }

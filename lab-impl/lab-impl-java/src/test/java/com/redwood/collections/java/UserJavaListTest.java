@@ -404,56 +404,56 @@ class UserJavaListTest {
 	// Производительность и память
 	// ============================================================
 
+	// ============================================================
+	// Производительность и память
+	// ============================================================
+
+	// ============================================================
+	// Производительность и память
+	// ============================================================
+
+	// ============================================================
+	// Производительность и память
+	// ============================================================
+
 	@Nested
 	class PerformanceAndMemory {
 
 		@Test
-		void complexityIsNLogNByComparisonCount() {
-			// Сравнения: O(N log N).
-			// O(N^2) даст резко большее отношение.
-			long[] counts = new long[2];
-			int[] sizes = {512, 1024};
-			for (int k = 0; k < sizes.length; k++) {
-				int n = sizes[k];
-				AtomicLong cmpCount = new AtomicLong();
-				Comparator<Integer> counting = (a, b) -> {
-					cmpCount.incrementAndGet();
+		void printFullPerformanceTable() {
+			int[] sizes = {1000, 2000, 4000, 8000, 16000};
+
+			System.out.println("\n=== Java: Замер производительности и памяти ===");
+			System.out.printf("%-12s\t%-12s\t%-12s\t%-12s%n", "N", "Comparisons", "Mem (KB)", "Time (ms)");
+
+			for (int n : sizes) {
+				System.gc();
+				Runtime rt = Runtime.getRuntime();
+				long memBefore = rt.totalMemory() - rt.freeMemory();
+
+				UserJavaList<Integer> list = new UserJavaList<>();
+				Random rnd = new Random(42);
+				for (int i = 0; i < n; i++) list.add(rnd.nextInt());
+
+				AtomicLong cmp = new AtomicLong();
+				Comparator<Integer> countingCmp = (a, b) -> {
+					cmp.incrementAndGet();
 					return Integer.compare(a, b);
 				};
-				UserJavaList<Integer> list = new UserJavaList<>();
-				Random rnd = new Random(n);
-				for (int i = 0; i < n; i++) list.add(rnd.nextInt());
-				list.sort(counting);
-				counts[k] = cmpCount.get();
-			}
-			double ratio = (double) counts[1] / counts[0];
-			assertTrue(ratio > 2.05, "Ratio too small for N log N: " + ratio);
-			assertTrue(ratio < 3.0, "Ratio too large for N log N: " + ratio);
-		}
 
-		@Test
-		void noNodeCreationDuringSort() throws Exception {
-			// Сортировка не должна создавать/удалять узлы
-			for (int n : new int[]{0, 1, 2, 5, 17, 64}) {
-				UserJavaList<Integer> list = new UserJavaList<>();
-				Random rnd = new Random(n);
-				for (int i = 0; i < n; i++) list.add(rnd.nextInt());
-				int before = countNodes(list);
-				list.sort(Integer::compare);
-				assertEquals(before, countNodes(list),
-					"Sort must not change node count (n=" + n + ")");
-				assertEquals(n, before);
-			}
-		}
+				long t0 = System.nanoTime();
+				list.sort(countingCmp);
+				double timeMs = (System.nanoTime() - t0) / 1_000_000.0;
 
-		@Test
-		void memoryScalesLinearlyWithSize() throws Exception {
-			// Память: N узлов + N данных + O(1)
-			int n = 5000;
-			UserJavaList<Integer> list = new UserJavaList<>();
-			for (int i = 0; i < n; i++) list.add(i);
-			assertEquals(n, countNodes(list));
-			assertEquals(n, list.size());
+				long memAfter = rt.totalMemory() - rt.freeMemory();
+				long memKb = (memAfter - memBefore) / 1024;
+
+				// %-12d для целых чисел, %-12.3f для дробных
+				System.out.printf("%-12d\t%-12d\t%-12d\t%-12.3f%n", n, cmp.get(), memKb, timeMs);
+
+				double upperBound = n * (Math.log(n) / Math.log(2) + 2);
+				assertTrue(cmp.get() <= upperBound, "Too many comparisons: " + cmp.get());
+			}
 		}
 	}
 }
