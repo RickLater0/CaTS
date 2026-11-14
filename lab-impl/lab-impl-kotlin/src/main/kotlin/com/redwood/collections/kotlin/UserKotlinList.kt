@@ -139,85 +139,90 @@ class UserKotlinList<T> : IUserList<T> {
 
     override operator fun iterator(): MutableIterator<T> = listIterator()
 
-    override fun listIterator(): MutableListIterator<T> = object : MutableListIterator<T> {
-        private var nextNode: Node<T>? = head
-        private var lastReturned: Node<T>? = null
-        private var nextIdx: Int = 0
-        private var expectedModCount: Int = modCount
+    override fun listIterator(): MutableListIterator<T> = listIterator(0)
 
-        private fun checkMod() {
-            if (modCount != expectedModCount)
-                throw ConcurrentModificationException("Concurrent modification")
-        }
+    fun listIterator(index: Int): MutableListIterator<T> {
+        require(index in 0..count) { "Index: $index, Size: $count" }
+        return object : MutableListIterator<T> {
+            private var nextNode: Node<T>? = if (index == count) null else getNode(index)
+            private var lastReturned: Node<T>? = null
+            private var nextIdx: Int = index
+            private var expectedModCount: Int = modCount
 
-        override fun hasNext(): Boolean = nextIdx < count
-
-        override fun next(): T {
-            checkMod()
-            if (!hasNext()) throw NoSuchElementException()
-            val current = nextNode!!
-            lastReturned = current
-            nextNode = current.next
-            nextIdx++
-            return current.data
-        }
-
-        override fun hasPrevious(): Boolean = nextIdx > 0
-
-        override fun previous(): T {
-            checkMod()
-            if (!hasPrevious()) throw NoSuchElementException()
-            val current = nextNode?.prev ?: tail!!
-            nextNode = current
-            lastReturned = current
-            nextIdx--
-            return current.data
-        }
-
-        override fun nextIndex(): Int = nextIdx
-        override fun previousIndex(): Int = nextIdx - 1
-
-        override fun remove() {
-            checkMod()
-            val removed = lastReturned ?: throw IllegalStateException()
-            val lastNext = removed.next
-            unlink(removed)
-            if (nextNode === removed) nextNode = lastNext else nextIdx--
-            lastReturned = null
-            expectedModCount = modCount
-        }
-
-        override fun set(element: T) {
-            checkMod()
-            val node = lastReturned ?: throw IllegalStateException()
-            node.data = element
-        }
-
-        override fun add(element: T) {
-            checkMod()
-            val newNode = Node(element)
-            val nx = nextNode
-            if (nx != null) {
-                newNode.prev = nx.prev
-                newNode.next = nx
-                if (nx.prev == null) head = newNode else nx.prev!!.next = newNode
-                nx.prev = newNode
-            } else {
-                newNode.prev = tail
-                if (tail == null) head = newNode else tail!!.next = newNode
-                tail = newNode
+            private fun checkMod() {
+                if (modCount != expectedModCount)
+                    throw ConcurrentModificationException("Concurrent modification")
             }
-            nextIdx++
-            count++
-            modCount++
-            lastReturned = null
-            expectedModCount = modCount
+
+            override fun hasNext(): Boolean = nextIdx < count
+
+            override fun next(): T {
+                checkMod()
+                if (!hasNext()) throw NoSuchElementException()
+                val current = nextNode!!
+                lastReturned = current
+                nextNode = current.next
+                nextIdx++
+                return current.data
+            }
+
+            override fun hasPrevious(): Boolean = nextIdx > 0
+
+            override fun previous(): T {
+                checkMod()
+                if (!hasPrevious()) throw NoSuchElementException()
+                val current = nextNode?.prev ?: tail!!
+                nextNode = current
+                lastReturned = current
+                nextIdx--
+                return current.data
+            }
+
+            override fun nextIndex(): Int = nextIdx
+            override fun previousIndex(): Int = nextIdx - 1
+
+            override fun remove() {
+                checkMod()
+                val removed = lastReturned ?: throw IllegalStateException()
+                val lastNext = removed.next
+                unlink(removed)
+                if (nextNode === removed) nextNode = lastNext else nextIdx--
+                lastReturned = null
+                expectedModCount = modCount
+            }
+
+            override fun set(element: T) {
+                checkMod()
+                val node = lastReturned ?: throw IllegalStateException()
+                node.data = element
+            }
+
+            override fun add(element: T) {
+                checkMod()
+                val newNode = Node(element)
+                val nx = nextNode
+                if (nx != null) {
+                    newNode.prev = nx.prev
+                    newNode.next = nx
+                    if (nx.prev == null) head = newNode else nx.prev!!.next = newNode
+                    nx.prev = newNode
+                } else {
+                    newNode.prev = tail
+                    if (tail == null) head = newNode else tail!!.next = newNode
+                    tail = newNode
+                }
+                nextIdx++
+                count++
+                modCount++
+                lastReturned = null
+                expectedModCount = modCount
+            }
         }
     }
 
     /** Мост для Java-интерфейса; лямбда с двумя параметрами конвертируется в [Comparator] (SAM). */
     override fun sort(c: Comparator<in T>?) {
-        requireNotNull(c) { "Comparator cannot be null" }
+        if (c == null) throw NullPointerException("Comparator cannot be null")
         sortImperative { a, b -> c.compare(a, b) }
     }
 

@@ -203,8 +203,8 @@ public class MainController {
 
 			Label valLabel = new Label(item.toString());
 			valLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-			Label prevLabel = new Label("P: " + (i == 0 ? "null" : i - 1));
-			Label nextLabel = new Label("N: " + (i == activeList.size() - 1 ? "null" : i + 1));
+			Label prevLabel = new Label("P: " + (i == 0 ? "n" : i - 1));
+			Label nextLabel = new Label("N: " + (i == activeList.size() - 1 ? "n" : i + 1));
 
 			if (i == currentIndex) {
 				nodeBox.setStyle("-fx-border-color: #ff3333; -fx-border-width: 3; -fx-padding: 10; -fx-background-color: #ffe6e6;");

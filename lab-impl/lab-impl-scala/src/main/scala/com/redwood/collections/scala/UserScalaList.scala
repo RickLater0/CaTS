@@ -131,11 +131,15 @@ class UserScalaList[T] extends IUserList[T] {
 
 	override def iterator(): java.util.Iterator[T] = listIterator()
 
-	override def listIterator(): util.ListIterator[T] = {
+	override def listIterator(): util.ListIterator[T] = listIterator(0)
+
+	def listIterator(index: Int): util.ListIterator[T] = {
+		if (index < 0 || index > _size)
+			throw new IndexOutOfBoundsException(s"Index: $index, Size: $_size")
 		new util.ListIterator[T] {
-			private var nextNode: Option[Node] = head
+			private var nextNode: Option[Node] = if (index == _size) None else Some(getNode(index))
 			private var lastReturned: Option[Node] = None
-			private var nextIdx: Int = 0
+			private var nextIdx: Int = index
 			private var expectedModCount: Int = modCount
 
 			private def checkMod(): Unit =
@@ -148,7 +152,9 @@ class UserScalaList[T] extends IUserList[T] {
 				checkMod()
 				if (!hasNext) throw new NoSuchElementException()
 				val current = nextNode.get
-				lastReturned = nextNode; nextNode = current.next; nextIdx += 1
+				lastReturned = nextNode;
+				nextNode = current.next;
+				nextIdx += 1
 				current.data
 			}
 
@@ -159,13 +165,16 @@ class UserScalaList[T] extends IUserList[T] {
 				if (!hasPrevious) throw new NoSuchElementException()
 				val current = nextNode match {
 					case Some(n) => n.prev.get
-					case None    => tail.get
+					case None => tail.get
 				}
-				nextNode = Some(current); lastReturned = Some(current); nextIdx -= 1
+				nextNode = Some(current);
+				lastReturned = Some(current);
+				nextIdx -= 1
 				current.data
 			}
 
 			override def nextIndex(): Int = nextIdx
+
 			override def previousIndex(): Int = nextIdx - 1
 
 			override def remove(): Unit = {
@@ -175,7 +184,8 @@ class UserScalaList[T] extends IUserList[T] {
 				val lastNext = removed.next
 				UserScalaList.this.rm(removed)
 				if (nextNode.contains(removed)) nextNode = lastNext else nextIdx -= 1
-				lastReturned = None; expectedModCount = modCount
+				lastReturned = None;
+				expectedModCount = modCount
 			}
 
 			override def set(elem: T): Unit = {
@@ -189,22 +199,26 @@ class UserScalaList[T] extends IUserList[T] {
 				val newNode = new Node(elem)
 				nextNode match {
 					case Some(n) =>
-						newNode.prev = n.prev; newNode.next = Some(n)
+						newNode.prev = n.prev;
+						newNode.next = Some(n)
 						n.prev match {
 							case Some(p) => p.next = Some(newNode)
-							case None    => head = Some(newNode)
+							case None => head = Some(newNode)
 						}
 						n.prev = Some(newNode)
 					case None =>
 						newNode.prev = tail
 						tail match {
 							case Some(t) => t.next = Some(newNode)
-							case None    => head = Some(newNode)
+							case None => head = Some(newNode)
 						}
 						tail = Some(newNode)
 				}
-				nextIdx += 1; _size += 1; modCount += 1
-				lastReturned = None; expectedModCount = modCount
+				nextIdx += 1;
+				_size += 1;
+				modCount += 1
+				lastReturned = None;
+				expectedModCount = modCount
 			}
 		}
 	}
